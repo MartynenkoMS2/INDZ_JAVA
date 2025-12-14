@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 */
 
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,22 +27,12 @@ import java.util.stream.Collectors;
  * </ul>
  */
 public class BasicDataOperationUsingMap {
-    private final Python KEY_TO_SEARCH_AND_DELETE = new Python("Удавчик", 18);
-    private final Python KEY_TO_ADD = new Python("Василіск", 26);
-
-    private final String VALUE_TO_SEARCH_AND_DELETE = "Мирослава";
-    private final String VALUE_TO_ADD = "Дар'я";
-
-    private Hashtable<Python, String> hashtable;
-    private LinkedHashMap<Python, String> linkedHashMap;
 
     /**
-     * Внутрішній клас Python для зберігання інформації про пітона.
-     * 
-     * Реалізує Comparable<Python> для визначення природного порядку сортування.
-     * Природний порядок: спочатку за кличкою (nickname) за спаданням, потім за кількістю плям (skinSpots) за зростанням.
+     * Статичний клас для зберігання інформації про пітона (Python).
+     * Містить поля: nickname (кличка) та skinSpots (кількість плям на шкірі).
      */
-    public static class Python implements Comparable<Python> {
+    public static class Python {
         private final String nickname;
         private final Integer skinSpots;
 
@@ -50,70 +41,19 @@ public class BasicDataOperationUsingMap {
             this.skinSpots = skinSpots;
         }
 
-        public String getNickname() { 
-            return nickname; 
+        public String getNickname() {
+            return nickname;
         }
 
         public Integer getSkinSpots() {
             return skinSpots;
         }
 
-        /**
-         * Порівнює цей об'єкт Python з іншим для визначення порядку сортування.
-         * Природний порядок: спочатку за кличкою (nickname) за спаданням, потім за кількістю плям (skinSpots) за зростанням.
-         * 
-         * @param other Python об'єкт для порівняння
-         * @return негативне число, якщо цей Python < other; 
-         *         0, якщо цей Python == other; 
-         *         позитивне число, якщо цей Python > other
-         * 
-         * Критерій порівняння: поле nickname (кличка) за спаданням та skinSpots (кількість плям) за зростанням.
-         * 
-         * Цей метод використовується:
-         * - TreeMap для автоматичного сортування ключів Python за nickname (спадання), потім за skinSpots (зростання)
-         * - Collections.sort() для сортування Map.Entry за ключами Python
-         * - Collections.binarySearch() для пошуку в відсортованих колекціях
-         */
         @Override
-        public int compareTo(Python other) {
-            if (other == null) return 1;
-            
-            // Спочатку порівнюємо за кличкою (за спаданням - інвертуємо результат)
-            int nicknameComparison = 0;
-            if (this.nickname == null && other.nickname == null) {
-                nicknameComparison = 0;
-            } else if (this.nickname == null) {
-                nicknameComparison = 1;  // null йде в кінець при спаданні
-            } else if (other.nickname == null) {
-                nicknameComparison = -1;
-            } else {
-                nicknameComparison = other.nickname.compareTo(this.nickname);  // Інвертоване порівняння для спадання
-            }
-            
-            // Якщо клички різні, повертаємо результат
-            if (nicknameComparison != 0) {
-                return nicknameComparison;
-            }
-            
-            // Якщо клички однакові, порівнюємо за кількістю плям (за зростанням)
-            if (this.skinSpots == null && other.skinSpots == null) return 0;
-            if (this.skinSpots == null) return -1;
-            if (other.skinSpots == null) return 1;
-            return this.skinSpots.compareTo(other.skinSpots);
+        public String toString() {
+            return "Python{nickname='" + nickname + "', skinSpots=" + skinSpots + "}";
         }
 
-        /**
-         * Перевіряє рівність цього Python з іншим об'єктом.
-         * Два Python вважаються рівними, якщо їх клички (nickname) та кількість плям (skinSpots) однакові.
-         * 
-         * @param obj об'єкт для порівняння
-         * @return true, якщо об'єкти рівні; false в іншому випадку
-         * 
-         * Критерій рівності: поля nickname (кличка) та skinSpots (кількість плям).
-         * 
-         * Важливо: метод узгоджений з compareTo() - якщо equals() повертає true,
-         * то compareTo() повертає 0, оскільки обидва методи порівнюють за nickname та skinSpots.
-         */
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
@@ -126,40 +66,33 @@ public class BasicDataOperationUsingMap {
             return nicknameEquals && skinSpotsEquals;
         }
 
-        /**
-         * Повертає хеш-код для цього Python.
-         * 
-         * @return хеш-код, обчислений на основі nickname та skinSpots
-         * 
-         * Базується на полях nickname та skinSpots для узгодженості з equals().
-         * 
-         * Важливо: узгоджений з equals() - якщо два Python рівні за equals()
-         * (мають однакові nickname та skinSpots), вони матимуть однаковий hashCode().
-         */
         @Override
         public int hashCode() {
-            // Початкове значення: хеш-код поля nickname (або 0, якщо nickname == null)
             int result = nickname != null ? nickname.hashCode() : 0;
-            
-            // Комбінуємо хеш-коди полів за формулою: result = 31 * result + hashCode(поле)
-            // Множник 31 - просте число, яке дає хороше розподілення хеш-кодів
-            // і оптимізується JVM як (result << 5) - result
-            // Додаємо хеш-код кількості плям (або 0, якщо skinSpots == null) до загального результату
             result = 31 * result + (skinSpots != null ? skinSpots.hashCode() : 0);
-            
             return result;
         }
-
-        /**
-         * Повертає строкове представлення Python.
-         * 
-         * @return кличка пітона (nickname), кількість плям (skinSpots) та hashCode
-         */
-        @Override
-        public String toString() {
-            return "Python{nickname='" + nickname + "', skinSpots=" + skinSpots + ", hashCode=" + hashCode() + "}";
-        }
     }
+
+    /**
+     * Статичний Comparator для сортування Python за кличкою (за спаданням) і кількістю плям (за зростанням).
+     * 
+     * Порядок сортування:
+     * 1. За кличкою (nickname) в зворотному порядку (спадання)
+     * 2. За кількістю плям (skinSpots) в нормальному порядку (зростання)
+     */
+    private static final Comparator<Python> PET_COMPARATOR = 
+        Comparator.comparing(Python::getNickname, Comparator.reverseOrder())
+                  .thenComparing(Python::getSkinSpots);
+
+    private final Python KEY_TO_SEARCH_AND_DELETE = new Python("Удавчик", 18);
+    private final Python KEY_TO_ADD = new Python("Василіск", 26);
+
+    private final String VALUE_TO_SEARCH_AND_DELETE = "Мирослава";
+    private final String VALUE_TO_ADD = "Дар'я";
+
+    private Hashtable<Python, String> hashtable;
+    private LinkedHashMap<Python, String> linkedHashMap;
 
     /**
      * Конструктор, який ініціалізує об'єкт з готовими даними.
@@ -245,14 +178,14 @@ public class BasicDataOperationUsingMap {
 
     /**
      * Сортує Hashtable за ключами.
-     * Використовує Collections.sort() з природним порядком Python (Python.compareTo()).
+     * Використовує PET_COMPARATOR для сортування за кличкою (спадання) та кількістю плям (зростання).
      * Перезаписує hashtable відсортованими даними.
      */
     private void sortHashtable() {
         long timeStart = System.nanoTime();
 
         hashtable = hashtable.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
+                .sorted(Map.Entry.comparingByKey(PET_COMPARATOR))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
@@ -265,14 +198,14 @@ public class BasicDataOperationUsingMap {
 
     /**
      * Сортує LinkedHashMap за ключами.
-     * Використовує Collections.sort() з природним порядком Python (Python.compareTo()).
+     * Використовує PET_COMPARATOR для сортування за кличкою (спадання) та кількістю плям (зростання).
      * Перезаписує linkedHashMap відсортованими даними.
      */
     private void sortLinkedHashMap() {
         long timeStart = System.nanoTime();
 
         linkedHashMap = linkedHashMap.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
+                .sorted(Map.Entry.comparingByKey(PET_COMPARATOR))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
