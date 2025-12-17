@@ -29,50 +29,11 @@ import java.util.stream.Collectors;
 public class BasicDataOperationUsingMap {
 
     /**
-     * Статичний клас для зберігання інформації про пітона (Python).
+     * Java record для зберігання інформації про пітона (Python).
+     * Рекорд автоматично генерує equals(), hashCode(), toString() та конструктор.
      * Містить поля: nickname (кличка) та skinSpots (кількість плям на шкірі).
      */
-    public static class Python {
-        private final String nickname;
-        private final Integer skinSpots;
-
-        public Python(String nickname, Integer skinSpots) {
-            this.nickname = nickname;
-            this.skinSpots = skinSpots;
-        }
-
-        public String getNickname() {
-            return nickname;
-        }
-
-        public Integer getSkinSpots() {
-            return skinSpots;
-        }
-
-        @Override
-        public String toString() {
-            return "Python{nickname='" + nickname + "', skinSpots=" + skinSpots + "}";
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Python python = (Python) obj;
-            
-            boolean nicknameEquals = nickname != null ? nickname.equals(python.nickname) : python.nickname == null;
-            boolean skinSpotsEquals = skinSpots != null ? skinSpots.equals(python.skinSpots) : python.skinSpots == null;
-            
-            return nicknameEquals && skinSpotsEquals;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = nickname != null ? nickname.hashCode() : 0;
-            result = 31 * result + (skinSpots != null ? skinSpots.hashCode() : 0);
-            return result;
-        }
-    }
+    public record Python(String nickname, Integer skinSpots) {}
 
     /**
      * Статичний Comparator для сортування Python за кличкою (за спаданням) і кількістю плям (за зростанням).
@@ -82,8 +43,8 @@ public class BasicDataOperationUsingMap {
      * 2. За кількістю плям (skinSpots) в нормальному порядку (зростання)
      */
     private static final Comparator<Python> PET_COMPARATOR = 
-        Comparator.comparing(Python::getNickname, Comparator.reverseOrder())
-                  .thenComparing(Python::getSkinSpots);
+        Comparator.comparing(Python::nickname, Comparator.reverseOrder())
+                  .thenComparing(Python::skinSpots);
 
     private final Python KEY_TO_SEARCH_AND_DELETE = new Python("Удавчик", 18);
     private final Python KEY_TO_ADD = new Python("Василіск", 26);
